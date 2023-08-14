@@ -2,7 +2,7 @@ name: ServerAPI
 main: io.github.mh321productions.serverapi.Main
 version: ${version}
 author: 321Productions
-api-version: 1.19
+#api-version: 1.19
 depend: [Vault, LuckPerms, ChatEx, XConomy]
 
 commands:
@@ -34,7 +34,7 @@ commands:
     usage: "Syntax: /<command> <set|reset>"
   node:
     description: Test mit Permission Nodes
-    usage "Syntax: /<command> [Spieler]"
+    usage "Syntax: "/<command> [Spieler]"
 
 permissions:
   api.report.use:
