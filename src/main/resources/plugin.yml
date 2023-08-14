@@ -1,0 +1,51 @@
+name: ServerAPI
+main: io.github.mh321productions.serverapi.Main
+version: ${version}
+author: 321Productions
+api-version: 1.19
+depend: [Vault, LuckPerms, ChatEx, XConomy]
+
+commands:
+  report:
+    description: Meldet einen Spieler aufgrund eines Fehlverhaltens
+    permission: api.report.use
+    aliases: rp
+    usage: "Syntax: /<command> <Spieler> <Grund>"
+  reportlist:
+    description: Verwaltet eingegangene Reports (für Mods/Sups)
+    permission: api.report.manage
+    aliases: reports
+    usage: |
+      Syntax:
+      /<command> list [Seite]
+      /<command> <show|sanction|free> <UUID>
+  chat:
+    description: Verwaltet Chats
+    permission: api.chat.use
+    aliases: c
+    usage: "Syntax: /<command> <Chat>"
+  message:
+    description: Schreibt einem Spieler eine Nachricht
+    aliases: [msg, tell]
+    permission: api.chat.msg
+    usage: "Syntax: /<command> <Spieler> <Nachricht>"
+  pack:
+    description: Test mit Resource Pack
+    usage: "Syntax: /<command> <set|reset>"
+  node:
+    description: Test mit Permission Nodes
+    usage "Syntax: /<command> [Spieler]"
+
+permissions:
+  api.report.use:
+    description: Erlaubt die Nutzung des Report-Commands
+    default: true
+  api.report.manage:
+    description: Erlaubt die Nutzung des Reportlist-Commands (Verwalten von Reports)
+    default: false
+  api.chat.use:
+    description: Erlaubt die Nutzung des Chat-Commands
+    default: true
+  api.chat.msg:
+    description: Erlaubt die Nutzung des MSG-Commands
+    default: true
