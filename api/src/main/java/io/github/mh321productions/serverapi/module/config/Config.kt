@@ -3,17 +3,19 @@ package io.github.mh321productions.serverapi.module.config
 import io.github.mh321productions.serverapi.Main
 import io.github.mh321productions.serverapi.configio.ConfigEntry
 import io.github.mh321productions.serverapi.configio.ConfigIO
+import io.github.mh321productions.serverapi.module.config.server.ServerConfigEntries
 import java.io.File
 import java.io.IOException
+import java.util.*
 import java.util.logging.Level
 
 /**
  * The abstract wrapper for a configuration file
  */
-abstract class Config(protected val main: Main, protected val file: File) {
+abstract class Config(protected val main: Main, protected val module: ConfigModule, protected val file: File) {
 
-    protected val entries = mutableMapOf<String, ConfigEntry>()
-    protected var dirty = false
+    private val entries = mutableMapOf<String, ConfigEntry>()
+    private var dirty = false
 
     fun isDirty() = dirty
 
@@ -32,11 +34,25 @@ abstract class Config(protected val main: Main, protected val file: File) {
         entries.remove(name)
     }
 
+    fun setDefaultEntry(entry: ConfigEntry) {
+        if (!entries.containsKey(entry.name)) {
+            entry.dirtyCallback = { dirty = true }
+            entries[entry.name] = entry
+        }
+    }
+
+    fun setDefaultEntries(collection: DefaultEntryCollection) {
+        collection.getDefaultEntries().forEach(::setDefaultEntry)
+    }
+
     fun loadFromFile() : Boolean {
         return try {
-            val list = ConfigIO.loadFile(file)
+            val list = if (file.exists() && file.isFile()) ConfigIO.loadFile(file) else listOf()
             entries.clear()
-            list.forEach { entries[it.name] = it }
+            list.forEach {
+                it.dirtyCallback = { dirty = true }
+                entries[it.name] = it
+            }
             dirty = false
             true
         } catch (ex: Exception) {
@@ -51,6 +67,7 @@ abstract class Config(protected val main: Main, protected val file: File) {
     }
 
     fun saveToFile() : Boolean {
+        if (!dirty) return true
         return try {
             val list = entries.values.toList()
             ConfigIO.saveFile(file, list)
@@ -61,4 +78,25 @@ abstract class Config(protected val main: Main, protected val file: File) {
             false
         }
     }
+}
+
+/**
+ * The wrapper for a player's changeable settings
+ */
+class PlayerConfig(main: Main, module: ConfigModule, val uuid: UUID) : Config(main, module, module.files.getPlayerConfigFile(uuid))
+
+/**
+ * The wrapper for a player's statistics, only changeable by plugins
+ */
+class PlayerStats(main: Main, module: ConfigModule, val uuid: UUID) : Config(main, module, module.files.getPlayerStatFile(uuid))
+
+/**
+ * A minimal interface for default entries
+ * @see ServerConfigEntries
+ */
+interface DefaultEntryCollection {
+    /**
+     * Returns a list of default entries
+     */
+    fun getDefaultEntries() : List<ConfigEntry>
 }
