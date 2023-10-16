@@ -14,9 +14,9 @@ object ConfigIO {
     private val MAGIC_VALUE = "SAC".toByteArray(Charsets.UTF_8)
     private const val MIN_UNCOMPRESSED_SIZE = 4L
 
-    data class ConfigDecodeResult(val entry: ConfigEntry, val readBytes: Int)
+    data class ConfigDecodeResult(val entry: ConfigEntry, val data: Any, val readBytes: Int)
 
-    @Throws(IOException::class, IllegalArgumentException::class, ConfigEntry.WrongTypeException::class)
+    @Throws(IOException::class, IllegalArgumentException::class)
     fun loadFile(file: File) : List<ConfigEntry> {
         val fin = FileInputStream(file)
 
@@ -50,7 +50,7 @@ object ConfigIO {
         var name: String
         var find: Int
         var index : Byte
-        var type : ConfigEntry.EntryType
+        var type : EntryType
         var result : ConfigDecodeResult
         while (data.isNotEmpty()) {
             find = data.indexOf(0)
@@ -58,13 +58,15 @@ object ConfigIO {
 
             name = data.subList(0, find).toByteArray().toString(Charsets.UTF_8)
             index = data[find + 1]
-            data.removeAll(data.subList(0, find + 2))
+            //data.removeAll(data.subList(0, find + 2))
+            for (i in 1..find + 2) data.removeFirst()
             try {
-                type = ConfigEntry.EntryType.getType(index)
+                type = EntryType.getType(index)
                 result = type.decodeData(name, data)
 
                 entries.add(result.entry)
-                data.removeAll(data.subList(0, result.readBytes))
+                //data.removeAll(data.subList(0, result.readBytes))
+                for (i in 1.. result.readBytes) data.removeFirst()
             } catch (ex: IllegalArgumentException) {
                 println("The entry \"$name\" Couldn't be decoded (${ex.message}). Skipping")
                 continue

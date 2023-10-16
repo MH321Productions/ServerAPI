@@ -1,6 +1,6 @@
 package io.github.mh321productions.serverapi.configeditor
 
-import io.github.mh321productions.serverapi.configeditor.ui.MainFrame
+import io.github.mh321productions.serverapi.configeditor.ui.frame.MainFrame
 import java.awt.EventQueue
 
 fun main() {

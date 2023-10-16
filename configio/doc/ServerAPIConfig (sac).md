@@ -11,7 +11,7 @@ A config file looks like this:
 
     SAC <Uncompressed size, 8>
      
-    <Config name, str> <Config Type, 1> <Config Value, 1/4/8/str>
+    <Config name, str> <Config Type, 1> <Config Value, 1/4/8/str/array>
     ...
 
 - The first 3 Bytes (```SAC```, the magic value) identify the format
@@ -29,4 +29,21 @@ respective data. Every entry is stored like this:
     - Long (8 Bytes)
     - Double (8 Bytes)
     - String (Null-terminated string)
+    - Array (see own section)
 - The next Bytes store the entry value. The number of Bytes depends on the type
+
+## Array structure
+
+An array looks like this:
+
+    <Entry type, 1> <Entry count, 4> <Entries, 1/4/8/str/array>
+
+- The first byte identifies the entry type (see above). It can also contain
+another array, allowing multidimensional arrays
+- The next 4 bytes hold the number of entries
+- The next bytes store the entries
+
+A multidimensional array ```[[1, 2, 3], [a, b, c], [true, false]]``` would
+look like this:
+
+    [8 3 [1 3 1 2 3] [7 3 a b c] [0 2 true false]]
