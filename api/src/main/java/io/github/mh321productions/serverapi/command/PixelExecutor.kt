@@ -42,7 +42,7 @@ class PixelExecutor<PLUGIN : JavaPlugin>(private val plugin: PLUGIN) : TabExecut
         command: Command,
         alias: String,
         args: Array<String>
-    ): List<String>? {
+    ): List<String> {
         for ((key, value) in commands) {
             if (command.name.equals(key, ignoreCase = true)) return value.onTab(
                 sender,
