@@ -2,7 +2,7 @@ name: ServerAPI
 main: io.github.mh321productions.serverapi.Main
 version: ${version}
 author: 321Productions
-#api-version: 1.19
+api-version: 1.19
 depend: [Vault, LuckPerms, ChatEx, XConomy, ProtocolLib]
 
 commands:
@@ -29,6 +29,14 @@ commands:
     aliases: [msg, tell]
     permission: api.chat.msg
     usage: "Syntax: /<command> <Spieler> <Nachricht>"
+  nick:
+    description: Weist einem Spieler einen Nickname zu
+    permission: api.nick.nick
+    usage: "Syntax: /<command> <Nickname>"
+  unnick:
+    description: Nimmt einem Spieler einen Nickname wieder weg
+    permission: api.nick.unnick
+    usage: "Syntax: /<command>"
   pack:
     description: Test mit Resource Pack
     usage: "Syntax: /<command> <set|reset>"
@@ -49,3 +57,9 @@ permissions:
   api.chat.msg:
     description: Erlaubt die Nutzung des MSG-Commands
     default: true
+  api.nick.nick:
+    description: Erlaubt die Nutzung des Nick-Commands
+    default: false
+  api.nick.unnick:
+    description: Erlaubt die Nutzung des Unnick-Commands
+    default: false

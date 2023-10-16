@@ -6,6 +6,8 @@ import io.github.mh321productions.serverapi.api.SubPlugin
 import io.github.mh321productions.serverapi.module.Module
 import io.github.mh321productions.serverapi.module.ModuleStopFunction
 import io.github.mh321productions.serverapi.module.ModuleType
+import io.github.mh321productions.serverapi.module.nick.command.NickCommand
+import io.github.mh321productions.serverapi.module.nick.command.UnnickCommand
 import org.bukkit.entity.Player
 
 /**
@@ -14,8 +16,15 @@ import org.bukkit.entity.Player
 class NickModule(main: Main, api: APIImplementation) : Module(ModuleType.Nick, main, api) {
 
     private val nickedPlayers = mutableMapOf<Player, String>()
+    private val nickCmd = NickCommand(plugin, api, this)
+    private val unnickCmd = UnnickCommand(plugin, api, this)
 
-    override fun init() = true
+    override fun init() : Boolean {
+        plugin.cmd.registerCommand("nick", nickCmd)
+        plugin.cmd.registerCommand("unnick", unnickCmd)
+
+        return true
+    }
 
     override fun stopIntern() {
         nickedPlayers.forEach { (a, _) -> a.setDisplayName(null) }
