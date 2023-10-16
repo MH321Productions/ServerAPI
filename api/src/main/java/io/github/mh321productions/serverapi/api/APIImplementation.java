@@ -7,7 +7,7 @@ import java.util.List;
 import io.github.mh321productions.serverapi.Main;
 import io.github.mh321productions.serverapi.module.nick.NickModule;
 import io.github.mh321productions.serverapi.module.npc.NPCModule;
-import io.github.mh321productions.serverapi.util.CounterSet;
+import io.github.mh321productions.serverapi.util.collection.CounterSet;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 

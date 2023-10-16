@@ -1,4 +1,4 @@
-package io.github.mh321productions.serverapi.util;
+package io.github.mh321productions.serverapi.util.collection;
 
 import org.jetbrains.annotations.NotNull;
 
