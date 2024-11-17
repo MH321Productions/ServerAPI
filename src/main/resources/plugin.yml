@@ -1,0 +1,82 @@
+name: ServerAPI
+main: io.github.mh321productions.serverapi.Main
+version: ${version}
+author: 321Productions
+api-version: 1.19
+depend: [Vault, LuckPerms, ChatEx, XConomy, ProtocolLib]
+
+commands:
+  report:
+    description: Meldet einen Spieler aufgrund eines Fehlverhaltens
+    permission: api.report.use
+    aliases: rp
+    usage: "Syntax: /<command> <Spieler> <Grund>"
+  reportlist:
+    description: Verwaltet eingegangene Reports (für Mods/Sups)
+    permission: api.report.manage
+    aliases: reports
+    usage: |
+      Syntax:
+      /<command> list [Seite]
+      /<command> <show|sanction|free> <UUID>
+  chat:
+    description: Verwaltet Chats
+    permission: api.chat.use
+    aliases: c
+    usage: "Syntax: /<command> <Chat>"
+  message:
+    description: Schreibt einem Spieler eine Nachricht
+    aliases: [msg, tell]
+    permission: api.chat.msg
+    usage: "Syntax: /<command> <Spieler> <Nachricht>"
+  nick:
+    description: Weist einem Spieler einen Nickname zu
+    permission: api.nick.nick
+    usage: "Syntax: /<command> <Nickname>"
+  unnick:
+    description: Nimmt einem Spieler einen Nickname wieder weg
+    permission: api.nick.unnick
+    usage: "Syntax: /<command>"
+  friend:
+    description: Verwaltet Freunde
+    permission: api.friend.use
+    usage: |
+      Syntax:
+      /<command> add <Spieler>
+      /<command> accept <Spieler>
+      /<command> deny <Spieler>
+      /<command> list [friends|requests]
+      /<command> jump <Spieler>
+      /<command> remove <Spieler>
+  pack:
+    description: Test mit Resource Pack
+    usage: "Syntax: /<command> <set|reset>"
+  node:
+    description: Test mit Permission Nodes
+    usage "Syntax: "/<command> [Spieler]"
+
+permissions:
+  api.report.use:
+    description: Erlaubt die Nutzung des Report-Commands
+    default: true
+  api.report.manage:
+    description: Erlaubt die Nutzung des Reportlist-Commands (Verwalten von Reports)
+    default: false
+  api.chat.use:
+    description: Erlaubt die Nutzung des Chat-Commands
+    default: true
+  api.chat.msg:
+    description: Erlaubt die Nutzung des MSG-Commands
+    default: true
+  api.nick.nick:
+    description: Erlaubt die Nutzung des Nick-Commands
+    default: false
+  api.nick.unnick:
+    description: Erlaubt die Nutzung des Unnick-Commands
+    default: false
+  api.friend.use:
+    description: Erlaubt die Nutzung des Friend-Commands
+    default: true
+  api.friend.bypass-limit:
+    description: Erlaubt, mehr Freunde als das Maximallimit zu haben
+    default: false
