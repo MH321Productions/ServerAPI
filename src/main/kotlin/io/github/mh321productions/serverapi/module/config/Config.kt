@@ -58,6 +58,11 @@ abstract class Config(protected val main: Main, protected val module: ConfigModu
     }
 
     fun loadFromFile() : Boolean {
+        if (!file.exists()) {
+            root = JsonObject()
+            return true
+        }
+
         return try {
             root = JsonParser.parseReader(InputStreamReader(GZIPInputStream(FileInputStream(file)), Charsets.UTF_8)) as JsonObject
             true
