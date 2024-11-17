@@ -100,8 +100,7 @@ class ReportEntry {
 
 
         //Sub-Plugin und Weltname anhand des Reporttyps identifizieren
-        val temp = if (type.plugin == null) ServerSubPlugin(reported)
-        else type.plugin
+        val temp = type.plugin ?: ServerSubPlugin.instance
         worldName = temp.getWorldName(loc.world!!)
         subName = temp.name
 

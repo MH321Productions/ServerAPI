@@ -29,7 +29,7 @@ abstract class Config(protected val main: Main, protected val module: ConfigModu
     private val gson = Gson()
 
     val server: ServerConfig
-        get() = getEntry(ServerSubPlugin.emptyServer) as ServerConfig
+        get() = getEntry(ServerSubPlugin.instance) as ServerConfig
 
     fun hasEntry(subPlugin: SubPlugin) = entries.containsKey(subPlugin)
 

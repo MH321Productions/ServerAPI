@@ -6,12 +6,10 @@ import io.github.mh321productions.serverapi.api.ServerSubPlugin
 import io.github.mh321productions.serverapi.api.SubPlugin
 import io.github.mh321productions.serverapi.module.Module
 import io.github.mh321productions.serverapi.module.ModuleType
-import io.github.mh321productions.serverapi.module.config.server.ServerConfig
 import io.github.mh321productions.serverapi.module.friend.FriendModule
 import io.github.mh321productions.serverapi.util.formatting.StringFormatter
 import io.github.mh321productions.serverapi.util.functional.KotlinBukkitRunnable
 import io.github.mh321productions.serverapi.util.message.MessageBuilder
-import io.github.mh321productions.serverapi.util.message.MessageFormatter
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -31,7 +29,7 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
     override fun initIntern(): Boolean {
         plugin.server.pluginManager.registerEvents(this, plugin)
 
-        pluginConfigClasses[ServerSubPlugin.emptyServer] = ServerSubPlugin.emptyServer.configInfo
+        pluginConfigClasses[ServerSubPlugin.instance] = ServerSubPlugin.instance.configInfo
 
         log.info("Initializing config directories")
         files = ConfigFilesystem(plugin, this)

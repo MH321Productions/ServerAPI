@@ -1,6 +1,5 @@
 package io.github.mh321productions.serverapi.module.report
 
-import com.google.common.collect.Lists
 import io.github.mh321productions.serverapi.api.ServerSubPlugin
 import io.github.mh321productions.serverapi.api.SubPlugin
 
@@ -53,15 +52,15 @@ class ReportType {
 
     companion object {
         @JvmField
-        val Hacking = ReportType(ServerSubPlugin.emptyServer, "Hacking", "server.hacking")
+        val Hacking = ReportType(ServerSubPlugin.instance, "Hacking", "server.hacking")
         @JvmField
-        val Chat = ReportType(ServerSubPlugin.emptyServer, "Chat", "server.chat")
+        val Chat = ReportType(ServerSubPlugin.instance, "Chat", "server.chat")
         @JvmField
-        val Bugusing = ReportType(ServerSubPlugin.emptyServer, "Bugusing", "server.bugusing")
+        val Bugusing = ReportType(ServerSubPlugin.instance, "Bugusing", "server.bugusing")
         @JvmField
-        val Skin = ReportType(ServerSubPlugin.emptyServer, "Skin", "server.skin")
+        val Skin = ReportType(ServerSubPlugin.instance, "Skin", "server.skin")
         @JvmField
-        val Username = ReportType(ServerSubPlugin.emptyServer, "Username", "server.name")
+        val Username = ReportType(ServerSubPlugin.instance, "Username", "server.name")
 
         @JvmField
 		val standardReasons: List<ReportType> = listOf(Bugusing, Chat, Hacking, Skin, Username)

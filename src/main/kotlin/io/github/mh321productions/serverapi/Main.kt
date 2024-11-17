@@ -30,8 +30,8 @@ class Main : JavaPlugin() {
         protocol = ProtocolLibrary.getProtocolManager()
 
         //Utility-Klassen starten
+        ServerSubPlugin.init(this)
         conf = PluginConfig(config)
-        ServerSubPlugin.setMain(this)
         filesystem = PixelFilesystem(this)
         logManager = PixelLogManager(this)
         cmd = PixelExecutor(this)
