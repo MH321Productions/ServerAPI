@@ -37,15 +37,19 @@ class APIImplementation(private val plugin: Main) : ServerAPI {
         plugin.logger.info("API gestartet und betriebsbereit")
 
         //TODO: Module starten
-        loadedModules.add(LogModule(plugin, this))
-        loadedModules.add(ConfigModule(plugin, this))
-        loadedModules.add(ReportModule(plugin, this))
-        loadedModules.add(ChatModule(plugin, this))
-        loadedModules.add(RealtimeModule(plugin, this))
-        loadedModules.add(NPCModule(plugin, this))
-        nickModule = NickModule(plugin, this)
-        loadedModules.add(nickModule)
-        loadedModules.add(FriendModule(plugin, this))
+        addModule(LogModule(plugin, this))
+        addModule(ConfigModule(plugin, this))
+        addModule(ReportModule(plugin, this))
+        addModule(ChatModule(plugin, this))
+        addModule(RealtimeModule(plugin, this))
+        addModule(NPCModule(plugin, this))
+        nickModule = addModule(NickModule(plugin, this))
+        addModule(FriendModule(plugin, this))
+    }
+
+    private fun <T: Module> addModule(module: T): T {
+        if (module.init()) loadedModules.add(module)
+        return module
     }
 
     fun stop() {
@@ -53,7 +57,7 @@ class APIImplementation(private val plugin: Main) : ServerAPI {
 
 
         //Die Module werden in umgekehrter Reihenfolge entladen (das Logging-Modul zuletzt)
-        Collections.reverse(loadedModules)
+        loadedModules.reverse()
         for (mod in loadedModules) mod.stop()
 
 
