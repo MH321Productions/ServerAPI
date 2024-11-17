@@ -22,7 +22,7 @@ class FriendModule(main: Main, api: APIImplementation) : Module(ModuleType.Frien
 
     private val conf = api.getModule(ModuleType.Config)
 
-    override fun init() : Boolean {
+    override fun initIntern() : Boolean {
         plugin.cmd.registerCommand("friend", FriendCommand(plugin, api, this))
 
         return true

@@ -28,7 +28,7 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
     private val autoSaveTasks = mutableMapOf<UUID, BukkitTask>()
     internal val pluginConfigClasses = mutableMapOf<SubPlugin, ConfigInfo>()
 
-    override fun init(): Boolean {
+    override fun initIntern(): Boolean {
         plugin.server.pluginManager.registerEvents(this, plugin)
 
         pluginConfigClasses[ServerSubPlugin.emptyServer] = ServerSubPlugin.emptyServer.configInfo

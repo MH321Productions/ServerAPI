@@ -21,7 +21,7 @@ class LogModule(plugin: Main, api: APIImplementation) : Module(ModuleType.Loggin
 
     private val logWrappers = mutableListOf<LogWrapper>()
 
-    override fun init() = true
+    override fun initIntern() = true
 
     override fun stopIntern() = logWrappers.forEach { it.end() }
 

@@ -18,7 +18,7 @@ class ChatModule(plugin: Main, api: APIImplementation) : Module(ModuleType.Chat,
     private var registeredChats = mutableMapOf<SubPlugin, MutableSet<Chat>>()
     private var playerChats = mutableMapOf<Player, Chat>()
 
-    override fun init(): Boolean {
+    override fun initIntern(): Boolean {
         plugin.server.pluginManager.registerEvents(this, plugin)
 
         //Commands registrieren

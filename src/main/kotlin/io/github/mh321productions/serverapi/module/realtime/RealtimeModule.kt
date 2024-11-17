@@ -12,7 +12,7 @@ class RealtimeModule(plugin: Main, api: APIImplementation) : Module(ModuleType.R
     private lateinit var worker: RealtimeWorker
     var worlds = mutableListOf<World>()
 
-    override fun init(): Boolean {
+    override fun initIntern(): Boolean {
         worker = RealtimeWorker(this)
         worker.runTaskTimer(plugin, 0, 20)
 

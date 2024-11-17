@@ -32,7 +32,7 @@ class ReportModule(plugin: Main, api: APIImplementation) : Module(ModuleType.Rep
     private lateinit var cmd: ReportCommand
     private lateinit var manageCmd: ReportsCommand
 
-    override fun init(): Boolean {
+    override fun initIntern(): Boolean {
         reasons.addAll(ReportType.standardReasons)
 
         log.info("Lade Reportdatei")

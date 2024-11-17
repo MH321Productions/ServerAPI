@@ -4,8 +4,6 @@ import io.github.mh321productions.serverapi.Main
 import io.github.mh321productions.serverapi.api.APIImplementation
 import io.github.mh321productions.serverapi.api.SubPlugin
 import java.lang.Module
-import java.util.logging.Logger
-import javax.annotation.Nonnull
 
 /**
  * Die Superklasse aller API-Module. <br></br>
@@ -18,23 +16,27 @@ abstract class Module protected constructor(
 	protected val api: APIImplementation
 ) {
 
-	val initialized: Boolean
+	var initialized = false
+        private set
+
     protected val loadedSubPlugins = mutableMapOf<SubPlugin, () -> Unit>()
 	protected val log = plugin.logger
 
-    init {
+    fun init(): Boolean {
         //Initialisieren
         log.info(String.format(startFormat, type.name))
 
-        initialized = init()
+        initialized = initIntern()
         if (initialized) log.info(String.format(startFormatSuccess, type.name))
         else log.severe(String.format(startFormatFailure, type.name))
+
+        return initialized
     }
 
     /**
      * Internes initialisieren des Moduls
      */
-    protected abstract fun init(): Boolean
+    protected abstract fun initIntern(): Boolean
 
     /**
      * Interne Stoppfunktion des Moduls (siehe [Module.stop])
@@ -114,5 +116,8 @@ abstract class Module protected constructor(
         private const val startFormatFailure = "%s-Modul konnte nicht geladen werden"
         private const val stopFormat = "Stoppe %s-Modul"
         private const val stopFormatSuccess = "%s-Modul erfolgreich gestoppt"
+
+        @JvmField
+        val emptyFunction: () -> Unit = {}
     }
 }

@@ -13,7 +13,7 @@ class NPCModule(main: Main, api: APIImplementation) : Module(ModuleType.NPC, mai
     private var minId = Int.MAX_VALUE
     private val freeIds = mutableSetOf<Int>()
 
-    override fun init() = true
+    override fun initIntern() = true
 
     override fun stopIntern() {
         managers.forEach { (_, b) -> b.unregisterAll() }
