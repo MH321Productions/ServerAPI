@@ -21,13 +21,11 @@ abstract class AbstractFriendCommand(main: Main, api: APIImplementation, protect
 
     protected companion object {
         val msgRequestSent: Message = MessageBuilder().setPrefixes(FriendModule.msgPrefix).addComponent("Freundschaftsanfrage gesendet").build()
-        val msgRequestSentAlready: Message = MessageBuilder()
-            .setPrefixes(FriendModule.msgPrefix)
-            .addComponent("§cDu hast diesem Spieler bereits eine Anfrage gesendet!")
-            .build()
+        val msgRequestSentAlready: Message = MessageBuilder().setPrefixes(FriendModule.msgPrefix).addComponent("§cDu hast diesem Spieler bereits eine Anfrage gesendet!").build()
         val msgNoIncomingRequest: Message = MessageBuilder().setPrefixes(FriendModule.msgPrefix).addComponent("§cEs gibt keine Anfrage dieses Spielers").build()
         val msgNoFriend: Message = MessageBuilder().setPrefixes(FriendModule.msgPrefix).addComponent("§cDu bist nicht mit diesem Spieler befreundet").build()
         val msgAlreadyFriend: Message = MessageBuilder().setPrefixes(FriendModule.msgPrefix).addComponent("§cDu bist bereits mit diesem Spieler befreundet").build()
+        val msgNoRequestToSelf = MessageBuilder().setPrefixes(FriendModule.msgPrefix).addComponent("§cDu kannst dir selbst keine Anfrage schicken").build()
     }
 
     fun msgFriendAdded(other: String): Message = MessageBuilder().setPrefixes(FriendModule.msgPrefix).addComponent("§7Du bist nun mit $other §7befreundet!").build()
@@ -94,6 +92,9 @@ class FriendAddCommand(main: Main, api: APIImplementation, module: FriendModule)
 
         if (other == null) {
             MessageFormatter.sendMessage(player, StdMessages.noPlayerWithName)
+            return true
+        } else if (other.uniqueId == player.uniqueId) {
+            MessageFormatter.sendMessage(player, msgNoRequestToSelf)
             return true
         }
 
