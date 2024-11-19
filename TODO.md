@@ -17,3 +17,6 @@
 14. [ ] Blockball wieder zum Laufen bringen
 15. [ ] Murder Resource Pack aktualisieren, Sounds runterregeln
 16. [ ] Neue Blockball Maps
+17. [ ] Neuen Testserver einrichten
+    - Siehe [Artikel](https://geekflare.com/hosting/free-minecraft-server-hosting/)
+    - Versuche [Gaming4Free](https://www.gaming4free.net/free-minecraft-hosting)
