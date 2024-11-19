@@ -78,13 +78,20 @@ abstract class Config(protected val main: Main, protected val module: ConfigModu
 
     fun saveToFile() : Boolean {
         return try {
-            root = JsonObject()
-            entries
-                .map { (subPlugin, entry) -> Pair(subPlugin, gson.toJsonTree(entry, getDeserializeClass(subPlugin.configInfo)).asJsonObject) }
-                .forEach { (subPlugin, json) -> root.add(subPlugin.configInfo.jsonName, json) }
+            val jsonEntries = root.asMap()
+            val serializedEntries = entries
+                .map { (subPlugin, entry) -> Pair(subPlugin.configInfo.jsonName, gson.toJsonTree(entry, getDeserializeClass(subPlugin.configInfo)).asJsonObject) }
+                .toMap()
+
+            //Add serialized (and maybe changed) and non-serialized entries to the output json
+            val json = JsonObject()
+            serializedEntries.forEach { (jsonName, entry) -> json.add(jsonName, entry) }
+            jsonEntries
+                .filterKeys { !serializedEntries.containsKey(it) }
+                .forEach { (jsonName, entry) -> json.add(jsonName, entry) }
 
             val writer = OutputStreamWriter(GZIPOutputStream(FileOutputStream(file)), Charsets.UTF_8)
-            writer.write(gson.toJson(root))
+            writer.write(gson.toJson(json))
             writer.close()
             true
         } catch (ex: IOException) {

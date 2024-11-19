@@ -132,7 +132,7 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
 
             configs[event.player.uniqueId]?.saveToFile()
             stats[event.player.uniqueId]?.saveToFile()
-        }.runTaskTimer(plugin, 0, 20 * 60 * 60)
+        }.runTaskTimer(plugin, 20 * 60 * 60, 20 * 60 * 60)
     }
 
     @EventHandler
