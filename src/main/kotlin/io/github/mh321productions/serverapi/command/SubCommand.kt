@@ -112,11 +112,11 @@ abstract class SubCommand<PLUGIN : JavaPlugin>(@JvmField protected val plugin: P
     }
 
     fun <T> List<T>.paginate(page: Int, entriesPerPage: Int): List<T> {
-        if (entriesPerPage <= 0 || page < 0) return listOf()
+        if (entriesPerPage <= 0 || page < 0 || isEmpty()) return listOf()
 
         val startIndex = min(page * entriesPerPage, size - 1)
         val endIndex = min((page + 1) * entriesPerPage, size)
-        if (endIndex == startIndex || endIndex == startIndex + 1) return listOf()
+        if (endIndex == startIndex) return listOf()
 
         return subList(startIndex, endIndex)
     }
