@@ -61,16 +61,14 @@ class MessageBuilder {
      * @param message Die Message, wird in [TextComponent] konvertiert
      * @return Die eigene Instanz
      */
-    fun addComponent(message: String?): MessageBuilder {
-        return addComponent(TextComponent(message))
-    }
+    fun addComponent(message: String) = addComponent(TextComponent(message))
 
     /**
      * Weist der letzten Komponente ein ClickEvent zu
      * @param event Das ClickEvent
      * @return Die eigene Instanz
      */
-    fun setClickEvent(event: ClickEvent?): MessageBuilder {
+    fun setClickEvent(event: ClickEvent): MessageBuilder {
         if (currentComp != null) currentComp!!.clickEvent = event
 
         return this
@@ -82,16 +80,14 @@ class MessageBuilder {
      * @param value Der Wert, der anhand der Aktion verarbeitet wird
      * @return Die eigene Instanz
      */
-    fun setClickEvent(action: ClickEvent.Action?, value: String?): MessageBuilder {
-        return setClickEvent(ClickEvent(action, value))
-    }
+    fun setClickEvent(action: ClickEvent.Action, value: String) = setClickEvent(ClickEvent(action, value))
 
     /**
      * Weist der letzten Komponente ein HoverEvent zu
      * @param event Das HoverEvent
      * @return Die eigene Instanz
      */
-    fun setHoverEvent(event: HoverEvent?): MessageBuilder {
+    fun setHoverEvent(event: HoverEvent): MessageBuilder {
         if (currentComp != null) currentComp!!.hoverEvent = event
 
         return this
@@ -103,9 +99,7 @@ class MessageBuilder {
      * @param contents Die Inhalte des Events (übersetzen ist schwierig)
      * @return Die eigene Instanz
      */
-    fun setHoverEvent(action: HoverEvent.Action?, vararg contents: Content?): MessageBuilder {
-        return setHoverEvent(HoverEvent(action, *contents))
-    }
+    fun setHoverEvent(action: HoverEvent.Action, vararg contents: Content) = setHoverEvent(HoverEvent(action, *contents))
 
     /**
      * Fügt der aktuellen Zeile Präfixe hinzu
@@ -156,8 +150,6 @@ class MessageBuilder {
      * @return Die eigene Instanz
      */
     fun newLine(): MessageBuilder {
-        currentLine.addMessage(newLine)
-
         currentLine = Line()
         lines.add(currentLine)
 
@@ -173,7 +165,7 @@ class MessageBuilder {
      * @return Die erstellte Message
      */
     fun build(): Message {
-        if (lines.isEmpty() || (currentLine.message.isEmpty() && currentLine.prefixes.isEmpty())) return Message.emptyMessage
+        if (lines.size == 1 && currentLine.message.isEmpty() && currentLine.prefixes.isEmpty()) return Message.emptyMessage
 
         val comp = mutableListOf<BaseComponent>()
         lines.forEachIndexed { index, line ->
