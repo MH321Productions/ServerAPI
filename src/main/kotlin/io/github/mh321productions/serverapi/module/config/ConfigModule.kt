@@ -10,6 +10,7 @@ import io.github.mh321productions.serverapi.module.friend.FriendModule
 import io.github.mh321productions.serverapi.util.formatting.StringFormatter
 import io.github.mh321productions.serverapi.util.functional.KotlinBukkitRunnable
 import io.github.mh321productions.serverapi.util.message.MessageBuilder
+import io.github.mh321productions.serverapi.util.message.MessageFormatter
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -115,17 +116,15 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
 
         val friendJoinMsg = MessageBuilder()
             .setPrefixes(FriendModule.msgPrefix)
-            .addComponent("${StringFormatter.formatPlayerName(uuid, plugin.perms.getHighestRank(uuid))} §7hat den Server betreten")
+            .addComponent("${StringFormatter.formatPlayerName(uuid, plugin.perms.getHighestRank(uuid))} §7ist nun §aonline")
             .build()
 
-        /*MessageFormatter.sendMessage(
+        MessageFormatter.sendMessage(
             getPlayerConfig(event.player.uniqueId)
-                .getEntry(ServerConfig.FRIEND_LIST)
-                .arrayValue
-                .uuidEntries
+                .server.friends.friends
                 .mapNotNull { plugin.server.getPlayer(it) },
             friendJoinMsg
-        )*/
+        )
 
         autoSaveTasks[event.player.uniqueId] = KotlinBukkitRunnable {
             log.info("Auto-saving configs and stats of player ${event.player.name}")
@@ -142,17 +141,15 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
         val uuid = event.player.uniqueId
         val friendLeaveMsg = MessageBuilder()
             .setPrefixes(FriendModule.msgPrefix)
-            .addComponent("${StringFormatter.formatPlayerName(uuid, plugin.perms.getHighestRank(uuid))} §7hat den Server verlassen")
+            .addComponent("${StringFormatter.formatPlayerName(uuid, plugin.perms.getHighestRank(uuid))} §7ist nun §coffline")
             .build()
 
-        /*MessageFormatter.sendMessage(
+        MessageFormatter.sendMessage(
             getPlayerConfig(event.player.uniqueId)
-                .getEntry(ServerConfig.FRIEND_LIST)
-                .arrayValue
-                .uuidEntries
+                .server.friends.friends
                 .mapNotNull { plugin.server.getPlayer(it) },
             friendLeaveMsg
-        )*/
+        )
 
         unloadPlayerConfig(uuid)
         unloadPlayerStats(uuid)
