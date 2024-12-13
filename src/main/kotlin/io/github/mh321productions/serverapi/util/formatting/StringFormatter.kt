@@ -225,7 +225,8 @@ object StringFormatter {
      * @return Der speicherbare String
      */
 	@JvmStatic
-	fun formatChatLocation(loc: Location, showWorld: Boolean): String {
+    @JvmOverloads
+	fun formatChatLocation(loc: Location, showWorld: Boolean = true): String {
         val builder = StringBuilder()
 
         //Welt
@@ -256,13 +257,6 @@ object StringFormatter {
 
         return builder.toString()
     }
-
-    /**
-     * Formatiert eine Location in einen String, den man im Chat anzeigen kann
-     * @param player Der Spieler, dessen Location formatiert werden soll
-     * @return Der speicherbare String
-     */
-    fun formatChatLocation(player: Player) = formatChatLocation(player.location, true)
 
     /**
      * Formatiert einen Spielernamen mit Prefix und Suffix des gegebenen Ranges

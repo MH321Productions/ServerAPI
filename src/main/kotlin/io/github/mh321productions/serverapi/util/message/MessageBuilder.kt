@@ -157,6 +157,18 @@ class MessageBuilder {
     }
 
     /**
+     * Entfernt die aktuelle Zeile
+     * @return Die eigene Instanz
+     */
+    fun removeLine(): MessageBuilder {
+        lines.removeLast()
+        if (lines.isEmpty()) newLine()
+        else currentLine = lines.last()
+
+        return this
+    }
+
+    /**
      * Fügt alle Komponenten zusammen und erstellt eine Message, die dann gesendet werden kann. <br></br>
      * Sollte der Builder leer sein, wird eine leere Message gesendet, sodass <br></br>
      *
