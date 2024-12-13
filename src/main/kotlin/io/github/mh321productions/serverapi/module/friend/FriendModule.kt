@@ -100,7 +100,7 @@ class FriendModule(main: Main, api: APIImplementation) : Module(ModuleType.Frien
         val ownIn = own.server.friends.incomingRequests
         val otherIn = other.server.friends.incomingRequests
 
-        if (ownOut.contains(friendToRequest) || ownIn.contains(friendToRequest) || ownFriends.contains(friendToRequest)) return false
+        if (blocksRequests(friendToRequest) || ownOut.contains(friendToRequest) || ownIn.contains(friendToRequest) || ownFriends.contains(friendToRequest)) return false
 
         ownOut.add(friendToRequest)
         otherIn.add(player)
@@ -162,6 +162,12 @@ class FriendModule(main: Main, api: APIImplementation) : Module(ModuleType.Frien
         .getPlayerConfig(player)
         .server.friends.outgoingRequests
         .contains(requestToQuery)
+
+    fun allowsRequests(player: UUID) = conf
+        .getPlayerConfig(player)
+        .server.friends.recieveInvites
+
+    fun blocksRequests(player: UUID) = !allowsRequests(player)
 
     /**
      * Checks whether a player can bypass a friend limit
