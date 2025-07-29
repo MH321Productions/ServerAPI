@@ -1,6 +1,7 @@
 package io.github.mh321productions.serverapi.util.permission
 
 import io.github.mh321productions.serverapi.Main
+import kotlinx.coroutines.future.await
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import net.luckperms.api.model.user.User
@@ -54,6 +55,12 @@ class PermissionHandler(private val plugin: Main) {
         LuckPermsListener(plugin, this, lp).registerEvents()
     }
 
+    fun Player.lpUser() = lp.getPlayerAdapter(Player::class.java).getUser(this)
+    suspend fun UUID.lpOfflineUser(): User = lp.userManager.loadUser(this).await()
+
+    fun getUser(player: Player) = lp.getPlayerAdapter(Player::class.java).getUser(player)
+    suspend fun getOfflineUserAsync(uuid: UUID): User = lp.userManager.loadUser(uuid).await()
+
     /**
      * Fragt ab, ob ein Spieler eine Permission hat
      * @param user Die LuckPerms-Instanz des Spielers
@@ -68,7 +75,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param perm Die Permission
      * @return Ob die Permission vorhanden und aktiviert ist
      */
-    fun hasPermission(p: Player, perm: String) = getRanks(p).firstOrNull { it.definesPermission(perm) }?.hasPermission(perm) ?: false
+    fun hasPermission(p: Player, perm: String) = hasPermission(p.lpUser(), perm)
 
     /**
      * Fragt ab, ob ein Spieler eine Permission hat
@@ -76,7 +83,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param perm Die Permission
      * @return Ob die Permission vorhanden und aktiviert ist
      */
-    fun hasPermission(uuid: UUID, perm: String) = getRanks(uuid).firstOrNull { it.definesPermission(perm) }?.hasPermission(perm) ?: false
+    suspend fun hasPermissionAsync(uuid: UUID, perm: String) = hasPermission(uuid.lpOfflineUser(), perm)
 
     /**
      * Fragt ab, ob ein [CommandSender] eine Permission hat (hat nur einen Effekt auf Spieler)
@@ -84,7 +91,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param perm Die Permission
      * @return Ob die Permission vorhanden und aktiviert ist (`true`, wenn es kein Spieler ist)
      */
-    fun hasPermission(sender: CommandSender, perm: String) = if (sender is Player) hasPermission(sender, perm) else true
+    //fun hasPermission(sender: CommandSender, perm: String) = if (sender is Player) hasPermission(sender, perm) else true
 
     /**
      * Fragt ab, ob ein Spieler einen Rang hat (beinhaltet vererbte Gruppen)
@@ -92,7 +99,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der interne Name des Rangs
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasRank(u: User?, rank: String): Boolean {
+    fun hasRank(u: User, rank: String): Boolean {
         return getRanks(u)
             .map { listOf(it.name, *it.subGroups.toTypedArray()) }
             .flatten()
@@ -105,7 +112,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der Rang
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasRank(u: User?, rank: Rank) = hasRank(u, rank.name)
+    fun hasRank(u: User, rank: Rank) = hasRank(u, rank.name)
 
     /**
      * Fragt ab, ob ein Spieler einen Rang hat (beinhaltet vererbte Gruppen)
@@ -113,7 +120,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der Rang
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasRank(p: Player, rank: Rank) = hasRank(lp.userManager.getUser(p.uniqueId), rank)
+    fun hasRank(p: Player, rank: Rank) = hasRank(p.lpUser(), rank)
 
     /**
      * Fragt ab, ob ein Spieler einen Rang hat (beinhaltet vererbte Gruppen)
@@ -121,7 +128,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der Rang
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasRank(uuid: UUID, rank: Rank) = hasRank(lp.userManager.getUser(uuid), rank.name)
+    suspend fun hasRankAsync(uuid: UUID, rank: Rank) = hasRank(uuid.lpOfflineUser(), rank.name)
 
     /**
      * Fragt ab, ob ein Spieler einen Rang hat (beinhaltet vererbte Gruppen)
@@ -129,7 +136,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der interne Name des Rangs
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasRank(p: Player, rank: String) = hasRank(lp.userManager.getUser(p.uniqueId), rank)
+    fun hasRank(p: Player, rank: String) = hasRank(p.lpUser(), rank)
 
     /**
      * Fragt ab, ob ein Spieler einen Rang hat (beinhaltet vererbte Gruppen)
@@ -137,7 +144,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der interne Name des Rangs
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasRank(uuid: UUID, rank: String) = hasRank(lp.userManager.getUser(uuid), rank)
+    suspend fun hasRankAsync(uuid: UUID, rank: String) = hasRank(uuid.lpOfflineUser(), rank)
 
     /**
      * Fragt ab, ob ein Spieler einen Rang hat (beinhaltet vererbte Gruppen)
@@ -145,7 +152,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der Rang
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasRank(p: Player, rank: DefaultRank) = hasRank(lp.userManager.getUser(p.uniqueId), rank.rankName)
+    fun hasRank(p: Player, rank: DefaultRank) = hasRank(p.lpUser(), rank.rankName)
 
     /**
      * Fragt ab, ob ein Spieler einen Rang hat (beinhaltet vererbte Gruppen)
@@ -153,7 +160,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der Rang
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasRank(uuid: UUID, rank: DefaultRank) = hasRank(lp.userManager.getUser(uuid), rank.rankName)
+    suspend fun hasRankAsync(uuid: UUID, rank: DefaultRank) = hasRank(uuid.lpOfflineUser(), rank.rankName)
 
     /**
      * Fragt ab, ob ein Spieler einen Rang hat (beinhaltet vererbte Gruppen)
@@ -177,7 +184,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param ranks Die Ränge
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasRank(uuid: UUID, vararg ranks: DefaultRank) = ranks.any { hasRank(uuid, it) }
+    suspend fun hasRankAsync(uuid: UUID, vararg ranks: DefaultRank) = ranks.any { hasRankAsync(uuid, it) }
 
     /**
      * Fragt ab, ob ein Spieler mindestens einen der gegebenen Ränge hat (beinhaltet vererbte Gruppen)
@@ -201,7 +208,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der Rang
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasExplicitRank(uuid: UUID, rank: Rank) = getRanks(uuid).contains(rank)
+    suspend fun hasExplicitRankAsync(uuid: UUID, rank: Rank) = getRanks(uuid.lpOfflineUser()).contains(rank)
 
     /**
      * Fragt ab, ob ein Spieler einen expliziten Rang hat (ohne vererbte Gruppen)
@@ -217,7 +224,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der interne Name des Rangs
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasExplicitRank(p: Player, rank: String) = getRanks(p).map { it.name }.contains(rank)
+    fun hasExplicitRank(p: Player, rank: String) = hasExplicitRank(p.lpUser(), rank)
 
     /**
      * Fragt ab, ob ein Spieler einen expliziten Rang hat (ohne vererbte Gruppen)
@@ -225,7 +232,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der interne Name des Rangs
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasExplicitRank(uuid: UUID, rank: String) = getRanks(uuid).map { it.name }.contains(rank)
+    suspend fun hasExplicitRankAsync(uuid: UUID, rank: String) = hasExplicitRank(uuid.lpOfflineUser(), rank)
 
     /**
      * Fragt ab, ob ein Spieler einen expliziten Rang hat (ohne vererbte Gruppen)
@@ -249,7 +256,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param rank Der Rang
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasExplicitRank(uuid: UUID, rank: DefaultRank) = hasExplicitRank(uuid, rank.rankName)
+    suspend fun hasExplicitRankAsync(uuid: UUID, rank: DefaultRank) = hasExplicitRank(uuid.lpOfflineUser(), rank.rankName)
 
     /**
      * Fragt ab, ob ein Spieler einen expliziten Rang hat (ohne vererbte Gruppen)
@@ -265,7 +272,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param ranks Die Ränge
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasExplicitRank(p: Player, vararg ranks: DefaultRank) = ranks.any { hasExplicitRank(p, it) }
+    fun hasExplicitRank(p: Player, vararg ranks: DefaultRank) = hasExplicitRank(p.lpUser(), *ranks)
 
     /**
      * Fragt ab, ob ein Spieler mindestens einen der gegebenen expliziten Ränge hat (ohne vererbte Gruppen)
@@ -273,7 +280,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param ranks Die Ränge
      * @return Ob der Rang zugewiesen ist
      */
-    fun hasExplicitRank(uuid: UUID, vararg ranks: DefaultRank) = ranks.any { hasExplicitRank(uuid, it) }
+    suspend fun hasExplicitRankAsync(uuid: UUID, vararg ranks: DefaultRank) = hasExplicitRank(uuid.lpOfflineUser(), *ranks)
 
     /**
      * Fragt ab, ob ein Spieler mindestens einen der gegebenen expliziten Ränge hat (ohne vererbte Gruppen)
@@ -323,9 +330,7 @@ class PermissionHandler(private val plugin: Main) {
      * @param user Die LuckPerms-Instanz des Spielers
      * @return Die Liste der Ränge oder eine leere Liste
      */
-    fun getRanks(user: User?): List<Rank> {
-        if (user == null) return listOf()
-
+    fun getRanks(user: User): List<Rank> {
         return getRanks(user.getNodes(NodeType.INHERITANCE)).sortedWith(Comparator(Rank::sortByWeight))
     }
 
@@ -334,23 +339,21 @@ class PermissionHandler(private val plugin: Main) {
      * @param player Der Spieler
      * @return Die Liste der Ränge oder eine leere Liste
      */
-    fun getRanks(player: Player) = getRanks(lp.userManager.getUser(player.uniqueId))
+    fun getRanks(player: Player) = getRanks(player.lpUser())
 
     /**
      * Gibt alle Ränge eines Spielers zurück
      * @param uuid Die UUID des Spielers
      * @return Die Liste der Ränge oder eine leere Liste
      */
-    fun getRanks(uuid: UUID) = getRanks(lp.userManager.getUser(uuid))
+    suspend fun getRanksAsync(uuid: UUID) = getRanks(uuid.lpOfflineUser())
 
     /**
      * Gibt den höchsten Rang eines Spielers zurück
      * @param u Die LuckPerms-Instanz des Spielers
      * @return Der höchste Rang oder default
      */
-    fun getHighestRank(u: User?): Rank {
-        if (u == null) return ranks.last()
-
+    fun getHighestRank(u: User): Rank {
         val nodes = u.getNodes(NodeType.INHERITANCE)
         if (nodes.isEmpty()) return defaultRank //Fallback auf default
 
@@ -366,14 +369,14 @@ class PermissionHandler(private val plugin: Main) {
      * @param p Der Spieler
      * @return Der höchste Rang oder default
      */
-    fun getHighestRank(p: Player) = getHighestRank(lp.userManager.getUser(p.uniqueId))
+    fun getHighestRank(p: Player) = getHighestRank(p.lpUser())
 
     /**
      * Gibt den höchsten Rang eines Spielers zurück
      * @param uuid Die UUID des Spielers
      * @return Der höchste Rang oder default
      */
-    fun getHighestRank(uuid: UUID) = getHighestRank(lp.userManager.getUser(uuid))
+    suspend fun getHighestRankAsync(uuid: UUID) = getHighestRank(uuid.lpOfflineUser())
 
     val defaultRank: Rank
         /**

@@ -1,6 +1,7 @@
 package io.github.mh321productions.serverapi.util.formatting
 
 import io.github.mh321productions.serverapi.util.permission.Rank
+import net.luckperms.api.model.user.User
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -278,5 +279,16 @@ object StringFormatter {
     @JvmStatic
     fun formatPlayerName(uuid: UUID, rank: Rank): String {
         return rank.prefix + Bukkit.getServer().getOfflinePlayer(uuid).name + rank.suffix
+    }
+
+    /**
+     * Formatiert einen Spielernamen mit Prefix und Suffix des gegebenen Ranges
+     * @param player Der Spieler
+     * @param rank Der zu nutzende Rang
+     * @return Der formatierte String
+     */
+    @JvmStatic
+    fun formatPlayerName(user: User, rank: Rank): String {
+        return rank.prefix + user.friendlyName + rank.suffix
     }
 }

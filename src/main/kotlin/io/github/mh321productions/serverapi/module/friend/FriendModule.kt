@@ -53,6 +53,7 @@ class FriendModule(main: Main, api: APIImplementation) : Module(ModuleType.Frien
         .server.friends.incomingRequests
         .toList()
 
+
     /**
      * Tries to add a friend to a player (without sending a friend request).
      * It performs three checks:
@@ -67,18 +68,36 @@ class FriendModule(main: Main, api: APIImplementation) : Module(ModuleType.Frien
      * @return Whether the friend is added
      * @see addRequest
      */
-    fun addFriend(player: UUID, newFriend: UUID) : Boolean {
-        val own = conf.getPlayerConfig(player)
+    fun addFriend(player: Player, newFriend: Player): Boolean = addFriend(player, newFriend.uniqueId, canBypassFriendLimit(newFriend))
+
+    /**
+     * Tries to add a friend to a player asynchronous (without sending a friend request).
+     * It performs three checks:
+     *
+     * 1. Is there a friend limit? (passes on false)
+     * 2. Has the player the maximum amount of friends? (passes on false)
+     * 3. Can the player bypass the limit (permission api.friend.bypass-limit)? (passes on true)
+     *
+     * If any check passes, the friend is added.
+     * This does **not** send messages to the players
+     *
+     * @return Whether the friend is added
+     * @see addRequest
+     */
+    suspend fun addFriendAsync(player: Player, newFriend: UUID): Boolean = addFriend(player, newFriend, canBypassFriendLimitAsync(newFriend))
+
+    private fun addFriend(player: Player, newFriend: UUID, canFriendBypass: Boolean) : Boolean {
+        val own = conf.getPlayerConfig(player.uniqueId)
         val other = conf.getPlayerConfig(newFriend)
         val ownFriends = own.server.friends.friends
         val otherFriends = other.server.friends.friends
 
         if (maxNumberOfFriends > -1 && ownFriends.size >= maxNumberOfFriends && !canBypassFriendLimit(player)) return false
         else if (ownFriends.contains(newFriend)) return false
-        else if (maxNumberOfFriends > -1 && otherFriends.size >= maxNumberOfFriends && !canBypassFriendLimit(newFriend)) return false
+        else if (maxNumberOfFriends > -1 && otherFriends.size >= maxNumberOfFriends && !canFriendBypass) return false
 
         ownFriends.add(newFriend)
-        otherFriends.add(player)
+        otherFriends.add(player.uniqueId)
         return true
     }
 
@@ -174,12 +193,12 @@ class FriendModule(main: Main, api: APIImplementation) : Module(ModuleType.Frien
      *
      * This queries the permission "api.friend.bypass-limit"
      */
-    fun canBypassFriendLimit(player: Player) = canBypassFriendLimit(player.uniqueId)
+    fun canBypassFriendLimit(player: Player) = plugin.perms.hasPermission(player, "api.friend.bypass-limit")
 
     /**
      * Checks whether a player can bypass a friend limit
      *
      * This queries the permission "api.friend.bypass-limit"
      */
-    fun canBypassFriendLimit(uuid: UUID) = plugin.perms.hasPermission(uuid, "api.friend.bypass-limit")
+    suspend fun canBypassFriendLimitAsync(uuid: UUID) = plugin.perms.hasPermissionAsync(uuid, "api.friend.bypass-limit")
 }

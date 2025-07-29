@@ -23,6 +23,8 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("com.google.code.gson:gson:2.10")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+
     compileOnly("org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     compileOnly("net.luckperms:api:5.4")

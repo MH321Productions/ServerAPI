@@ -5,17 +5,26 @@ import io.github.mh321productions.serverapi.api.APIImplementation
 import io.github.mh321productions.serverapi.command.APISubCommand
 import io.github.mh321productions.serverapi.module.friend.FriendModule
 import io.github.mh321productions.serverapi.util.formatting.StringFormatter
+import io.github.mh321productions.serverapi.util.functional.coroutineFuture
+import io.github.mh321productions.serverapi.util.functional.whenCompleteServerSync
 import io.github.mh321productions.serverapi.util.message.Message
 import io.github.mh321productions.serverapi.util.message.MessageBuilder
 import io.github.mh321productions.serverapi.util.message.MessageFormatter
 import io.github.mh321productions.serverapi.util.message.MessagePrefix
+import kotlinx.coroutines.*
+import kotlinx.coroutines.future.asCompletableFuture
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.future.future
+import net.luckperms.api.model.user.User
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.hover.content.Text
+import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 abstract class AbstractFriendCommand(main: Main, api: APIImplementation, protected val module: FriendModule) : APISubCommand(main, api) {
 
@@ -43,14 +52,15 @@ abstract class AbstractFriendCommand(main: Main, api: APIImplementation, protect
 
     fun msgFriendAdded(other: String): Message = MessageBuilder().setPrefixes(FriendModule.msgPrefix).addComponent("§7Du bist nun mit $other §7befreundet!").build()
     fun msgFriendAdded(other: Player) = msgFriendAdded(StringFormatter.formatPlayerName(other, plugin.perms.getHighestRank(other)))
-    fun msgFriendAdded(other: UUID) = msgFriendAdded(StringFormatter.formatPlayerName(other, plugin.perms.getHighestRank(other)))
+    suspend fun msgFriendAddedAsync(other: UUID) = msgFriendAdded(StringFormatter.formatPlayerName(other, plugin.perms.getHighestRankAsync(other)))
 
     fun msgIncomingRequestDenied(other: String): Message = MessageBuilder()
         .setPrefixes(FriendModule.msgPrefix)
         .addComponent("§7Du hast die Anfrage von $other §7abgelehnt.")
         .build()
-    fun msgIncomingRequestDenied(other: Player) = msgIncomingRequestDenied(StringFormatter.formatPlayerName(other, plugin.perms.getHighestRank(other)))
-    fun msgIncomingRequestDenied(other: UUID) = msgIncomingRequestDenied(StringFormatter.formatPlayerName(other, plugin.perms.getHighestRank(other)))
+    fun msgIncomingRequestDenied(other: User) = msgIncomingRequestDenied(StringFormatter.formatPlayerName(other, plugin.perms.getHighestRank(other)))
+    fun msgIncomingRequestDenied(player: Player): Message = msgIncomingRequestDenied(plugin.perms.getUser(player))
+    suspend fun msgIncomingRequestDeniedAsnyc(other: UUID) = msgIncomingRequestDenied(plugin.perms.getOfflineUserAsync(other))
 
     fun msgOutgoingRequestDenied(other: Player) = MessageBuilder()
         .setPrefixes(FriendModule.msgPrefix)
@@ -63,7 +73,7 @@ abstract class AbstractFriendCommand(main: Main, api: APIImplementation, protect
         .addComponent("§7Du bist nun nicht mehr mit $other §7befreundet!")
         .build()
     fun msgFriendRemoved(other: Player) = msgFriendRemoved(StringFormatter.formatPlayerName(other, plugin.perms.getHighestRank(other)))
-    fun msgFriendRemoved(other: UUID) = msgFriendRemoved(StringFormatter.formatPlayerName(other, plugin.perms.getHighestRank(other)))
+    //fun msgFriendRemoved(other: UUID) = msgFriendRemoved(StringFormatter.formatPlayerName(other, plugin.perms.getHighestRank(other)))
 
     protected fun queryPlayer(arg: String) : PlayerQueryResult {
         val online = plugin.server.getPlayer(arg)
@@ -139,9 +149,10 @@ class FriendAddCommand(main: Main, api: APIImplementation, module: FriendModule)
             } else if (module.hasIncomingRequest(player.uniqueId, other.uniqueId)) {
                 //Other player already sent request, add friend
                 module.removeRequest(player.uniqueId, other.uniqueId)
-                module.addFriend(player.uniqueId, other.uniqueId)
-                MessageFormatter.sendMessage(player, msgFriendAdded(other))
-                MessageFormatter.sendMessage(other, msgFriendAdded(player))
+                if (module.addFriend(player, other)) {
+                    MessageFormatter.sendMessage(player, msgFriendAdded(other))
+                    MessageFormatter.sendMessage(other, msgFriendAdded(player))
+                }
             } else if (module.hasFriend(player.uniqueId, other.uniqueId)) {
                 MessageFormatter.sendMessage(player, msgAlreadyFriend)
             } else if (module.blocksRequests(other.uniqueId)) {
@@ -173,9 +184,13 @@ class FriendAcceptCommand(main: Main, api: APIImplementation, module: FriendModu
         if (!module.hasIncomingRequest(player.uniqueId, query.uuid)) MessageFormatter.sendMessage(player, msgNoIncomingRequest)
         else {
             module.removeRequest(player.uniqueId, query.uuid)
-            module.addFriend(player.uniqueId, query.uuid)
-            MessageFormatter.sendMessage(player, msgFriendAdded(query.uuid))
-            if (query.isOnline) MessageFormatter.sendMessage(other.player!!, msgFriendAdded(player))
+
+            asyncBlock {
+                if (module.addFriendAsync(player, query.uuid)) {
+                    MessageFormatter.sendMessage(player, msgFriendAddedAsync(query.uuid))
+                    if (query.isOnline) MessageFormatter.sendMessage(other.player!!, msgFriendAdded(player))
+                }
+            }
         }
 
         return true
@@ -206,8 +221,11 @@ class FriendDenyCommand(main: Main, api: APIImplementation, module: FriendModule
         if (!module.hasIncomingRequest(player.uniqueId, query.uuid)) MessageFormatter.sendMessage(player, msgNoIncomingRequest)
         else {
             module.removeRequest(player.uniqueId, query.uuid)
-            MessageFormatter.sendMessage(player, msgIncomingRequestDenied(query.uuid))
-            if (query.isOnline) MessageFormatter.sendMessage(other.player!!, msgOutgoingRequestDenied(player))
+
+            asyncBlock {
+                MessageFormatter.sendMessage(player, msgIncomingRequestDeniedAsnyc(query.uuid))
+                if (query.isOnline) MessageFormatter.sendMessage(other.player!!, msgOutgoingRequestDenied(player))
+            }
         }
 
         return true
@@ -277,23 +295,29 @@ class FriendListFriendsCommand(main: Main, api: APIImplementation, module: Frien
 
         val friend = if (friends.size == 1) "§7Freund" else "§7Freunde"
 
-        val msg = MessageBuilder()
-            .setPrefixes(FriendModule.msgPrefix)
-            .addComponent("§7Deine Freundesliste§7:")
-            .newLine()
-            .addComponent("§7Du hast §e${friends.size} $friend §8(§7Seite §e${page + 1} §7von §e$maxPage§8)")
-            .newLine()
-            .newLine()
 
-        friends
-            .paginate(page, friendsPerPage)
-            .map { FriendInfo(plugin.server.getOfflinePlayer(it), StringFormatter.formatPlayerName(it, plugin.perms.getHighestRank(it))) }
-            .forEach { msg
-                .addComponent("§7● ${it.name} §8(${if (it.player.isOnline) ONLINE else OFFLINE}§8)")
+        asyncBlock {
+            val msg = MessageBuilder()
+                .setPrefixes(FriendModule.msgPrefix)
+                .addComponent("§7Deine Freundesliste§7:")
                 .newLine()
-            }
+                .addComponent("§7Du hast §e${friends.size} $friend §8(§7Seite §e${page + 1} §7von §e$maxPage§8)")
+                .newLine()
+                .newLine()
 
-        MessageFormatter.sendMessage(player, msg.build())
+            friends
+                .paginate(page, friendsPerPage)
+                .map { FriendInfo(plugin.server.getOfflinePlayer(it), StringFormatter.formatPlayerName(it, plugin.perms.getHighestRankAsync(it))) }
+                .forEach { msg
+                    .addComponent("§7● ${it.name} §8(${if (it.player.isOnline) ONLINE else OFFLINE}§8)")
+                    .newLine()
+                }
+
+            msg.build()
+        }.whenCompleteServerSync({ message ->
+            MessageFormatter.sendMessage(player, message)
+        }, plugin)
+
 
         return true
     }
@@ -323,46 +347,50 @@ class FriendListRequestsCommand(main: Main, api: APIImplementation, module: Frie
             return true
         }
 
-        val msg = MessageBuilder() //TODO: Überarbeiten
-            .setPrefixes(FriendModule.msgPrefix)
-            .addComponent("§7Deine Anfragen:")
-            .newLine()
-            .newLine()
+        coroutineFuture {
+            val msg = MessageBuilder()
+                .setPrefixes(FriendModule.msgPrefix)
+                .addComponent("§7Deine Anfragen:")
+                .newLine()
+                .newLine()
 
-        if (incoming.isNotEmpty()) {
-            incoming
-                .forEach { msg
-                    .addComponent("§7⬋")
-                    .setHoverEvent(HoverEvent.Action.SHOW_TEXT, Text("§7Eingehend"))
-                    .addComponent(" ${StringFormatter.formatPlayerName(it.uniqueId, plugin.perms.getHighestRank(it.uniqueId))} ")
-                    .addComponent("§a§l✔")
-                    .setHoverEvent(HoverEvent.Action.SHOW_TEXT, Text("§aAnnehmen"))
-                    .setClickEvent(ClickEvent.Action.RUN_COMMAND, "/friend accept ${it.name}")
-                    .addComponent(" §8| ")
-                    .addComponent("§c§l✘")
-                    .setHoverEvent(HoverEvent.Action.SHOW_TEXT, Text("§cAblehnen"))
-                    .setClickEvent(ClickEvent.Action.RUN_COMMAND, "/friend deny ${it.name}")
-                    .newLine()
-                }
+            if (incoming.isNotEmpty()) {
+                incoming
+                    .forEach { msg
+                        .addComponent("§7⬋")
+                        .setHoverEvent(HoverEvent.Action.SHOW_TEXT, Text("§7Eingehend"))
+                        .addComponent(" ${StringFormatter.formatPlayerName(it.uniqueId, plugin.perms.getHighestRankAsync(it.uniqueId))} ")
+                        .addComponent("§a§l✔")
+                        .setHoverEvent(HoverEvent.Action.SHOW_TEXT, Text("§aAnnehmen"))
+                        .setClickEvent(ClickEvent.Action.RUN_COMMAND, "/friend accept ${it.name}")
+                        .addComponent(" §8| ")
+                        .addComponent("§c§l✘")
+                        .setHoverEvent(HoverEvent.Action.SHOW_TEXT, Text("§cAblehnen"))
+                        .setClickEvent(ClickEvent.Action.RUN_COMMAND, "/friend deny ${it.name}")
+                        .newLine()
+                    }
 
-            msg.newLine()
-        }
+                msg.newLine()
+            }
 
-        if (outgoing.isNotEmpty()) {
-            outgoing
-                .forEach { msg
-                    .addComponent("§7⬈")
-                    .setHoverEvent(HoverEvent.Action.SHOW_TEXT, Text("§7Ausgehend"))
-                    .addComponent(" ${StringFormatter.formatPlayerName(it.uniqueId, plugin.perms.getHighestRank(it.uniqueId))} ")
-                    .newLine()
-                }
-        } else {
+            if (outgoing.isNotEmpty()) {
+                outgoing
+                    .forEach { msg
+                        .addComponent("§7⬈")
+                        .setHoverEvent(HoverEvent.Action.SHOW_TEXT, Text("§7Ausgehend"))
+                        .addComponent(" ${StringFormatter.formatPlayerName(it.uniqueId, plugin.perms.getHighestRankAsync(it.uniqueId))} ")
+                        .newLine()
+                    }
+            } else {
+                msg.removeLine()
+            }
+
             msg.removeLine()
-        }
 
-        msg.removeLine()
+            msg.build()
+        }.whenCompleteServerSync({ msg -> MessageFormatter.sendMessage(player, msg) }, plugin)
 
-        MessageFormatter.sendMessage(player, msg.build())
+
 
         return true
     }
@@ -434,4 +462,10 @@ class FriendRemoveCommand(main: Main, api: APIImplementation, module: FriendModu
             .map { plugin.server.getOfflinePlayer(it).name ?: it.toString() }
             .filter { it.startsWith(args[0], true) }
 
+}
+
+private fun <T> asyncBlock(func: suspend () -> T): CompletableFuture<T> {
+    return CoroutineScope(Dispatchers.IO).future {
+        func()
+    }
 }

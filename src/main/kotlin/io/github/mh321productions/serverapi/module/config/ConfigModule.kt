@@ -11,6 +11,10 @@ import io.github.mh321productions.serverapi.util.formatting.StringFormatter
 import io.github.mh321productions.serverapi.util.functional.KotlinBukkitRunnable
 import io.github.mh321productions.serverapi.util.message.MessageBuilder
 import io.github.mh321productions.serverapi.util.message.MessageFormatter
+import net.md_5.bungee.api.chat.HoverEvent
+import net.md_5.bungee.api.chat.TextComponent
+import net.md_5.bungee.api.chat.hover.content.Text
+import org.bukkit.Statistic
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -110,13 +114,15 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
     fun onJoin(event: PlayerJoinEvent) {
         log.info("Loading stats and configs from player ${event.player.name}")
 
-        val uuid = event.player.uniqueId
+        val player = event.player
+        val uuid = player.uniqueId
         loadPlayerConfig(uuid, false)
         loadPlayerStats(uuid, false)
 
+        //Messages to online friends
         val friendJoinMsg = MessageBuilder()
             .setPrefixes(FriendModule.msgPrefix)
-            .addComponent("${StringFormatter.formatPlayerName(uuid, plugin.perms.getHighestRank(uuid))} §7ist nun §aonline")
+            .addComponent("${StringFormatter.formatPlayerName(player, plugin.perms.getHighestRank(player))} §7ist nun §aonline")
             .build()
 
         MessageFormatter.sendMessage(
@@ -126,6 +132,34 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
             friendJoinMsg
         )
 
+        //Messages to joining player
+        val numberOfIncomingRequests = getPlayerConfig(uuid).server.friends.incomingRequests.size
+        if (numberOfIncomingRequests > 0) {
+            val incomingRequestsMsg = MessageBuilder()
+                .setPrefixes(FriendModule.msgPrefix)
+                .addComponent("§7Du hast §e${numberOfIncomingRequests} §7offene Freundschaftsanfrage${if (numberOfIncomingRequests == 1) "" else "n"}")
+                .build()
+
+            MessageFormatter.sendMessage(player, incomingRequestsMsg)
+        }
+
+        val onlineFriends = getPlayerConfig(uuid)
+            .server.friends.friends
+            .mapNotNull { plugin.server.getPlayer(it) }
+        if (onlineFriends.isNotEmpty()) {
+            val onlineFriendsMsg = MessageBuilder()
+                .setPrefixes(FriendModule.msgPrefix)
+                .addComponent("§7Aktuell ${if (onlineFriends.size == 1) "ist" else "sind"} ")
+                .addComponent("§e${onlineFriends.size}")
+                .setHoverEvent(HoverEvent.Action.SHOW_TEXT, *onlineFriends.map { Text(StringFormatter.formatPlayerName(it, plugin.perms.getHighestRank(it))) }.toTypedArray())
+                .addComponent(" §7deiner Freunde online")
+                .build()
+
+            MessageFormatter.sendMessage(player, onlineFriendsMsg)
+        }
+
+
+        //Auto Save
         autoSaveTasks[event.player.uniqueId] = KotlinBukkitRunnable {
             log.info("Auto-saving configs and stats of player ${event.player.name}")
 
@@ -138,10 +172,11 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
     fun onQuit(event: PlayerQuitEvent) {
         log.info("Unloading stats and configs from player ${event.player.name}")
 
-        val uuid = event.player.uniqueId
+        val player = event.player
+        val uuid = player.uniqueId
         val friendLeaveMsg = MessageBuilder()
             .setPrefixes(FriendModule.msgPrefix)
-            .addComponent("${StringFormatter.formatPlayerName(uuid, plugin.perms.getHighestRank(uuid))} §7ist nun §coffline")
+            .addComponent("${StringFormatter.formatPlayerName(player, plugin.perms.getHighestRank(player))} §7ist nun §coffline")
             .build()
 
         MessageFormatter.sendMessage(

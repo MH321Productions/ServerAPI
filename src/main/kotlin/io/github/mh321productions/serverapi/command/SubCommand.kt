@@ -13,7 +13,7 @@ import kotlin.math.min
  * ein Tiefenbaum erstellen.
  * @author 321Productions
  */
-abstract class SubCommand<PLUGIN : JavaPlugin>(@JvmField protected val plugin: PLUGIN) {
+abstract class SubCommand<TPlugin : JavaPlugin>(@JvmField protected val plugin: TPlugin) {
     /**
      * Eine Sammlung von oft benutzten Command-Messages
      * @author 321Productions
@@ -47,7 +47,7 @@ abstract class SubCommand<PLUGIN : JavaPlugin>(@JvmField protected val plugin: P
      * Alle Subcommands (rekursiv)
      */
     @JvmField
-    protected val sub = mutableMapOf<String, SubCommand<PLUGIN>>()
+    protected val sub = mutableMapOf<String, SubCommand<TPlugin>>()
     protected abstract fun executeIntern(sender: CommandSender, isPlayer: Boolean, args: List<String>): Boolean
     protected abstract fun tabIntern(sender: CommandSender, isPlayer: Boolean, args: List<String>): List<String>
     fun onExecute(sender: CommandSender, isPlayer: Boolean, args: List<String>): Boolean {
