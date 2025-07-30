@@ -23,8 +23,8 @@ class NickModule(main: Main, api: APIImplementation) : Module(ModuleType.Nick, m
     private val nickedPlayers = mutableMapOf<Player, String>()
 
     override fun initIntern() : Boolean {
-        plugin.cmd.registerCommand("nick", NickCommand(plugin, api, this))
-        plugin.cmd.registerCommand("unnick", UnnickCommand(plugin, api, this))
+        main.cmd.registerCommand("nick", NickCommand(main, api, this))
+        main.cmd.registerCommand("unnick", UnnickCommand(main, api, this))
 
         return true
     }

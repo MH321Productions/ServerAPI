@@ -3,7 +3,7 @@ package io.github.mh321productions.serverapi.module
 import io.github.mh321productions.serverapi.Main
 import io.github.mh321productions.serverapi.api.APIImplementation
 import io.github.mh321productions.serverapi.api.SubPlugin
-import java.lang.Module
+import io.github.mh321productions.serverapi.api.ServerAPI
 
 /**
  * Die Superklasse aller API-Module. <br></br>
@@ -11,16 +11,16 @@ import java.lang.Module
  * @author 321Productions
  */
 abstract class Module protected constructor(
-	val type: ModuleType<*>,
-	protected val plugin: Main,
-	protected val api: APIImplementation
+    val type: ModuleType<out Module>,
+    protected val main: Main,
+    protected val api: APIImplementation
 ) {
 
 	var initialized = false
         private set
 
     protected val loadedSubPlugins = mutableMapOf<SubPlugin, () -> Unit>()
-	protected val log = plugin.logger
+	protected val log = main.logger
 
     fun init(): Boolean {
         //Initialisieren

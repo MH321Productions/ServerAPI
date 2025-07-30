@@ -27,7 +27,7 @@ class NPCModule(main: Main, api: APIImplementation) : Module(ModuleType.NPC, mai
         if (isSubPluginLoaded(sub)) return true
         else if (!addIntern(sub, func)) return false
 
-        managers[sub] = NPCManager(plugin, sub, this)
+        managers[sub] = NPCManager(main, sub, this)
 
         return true
     }

@@ -19,13 +19,13 @@ class ChatModule(plugin: Main, api: APIImplementation) : Module(ModuleType.Chat,
     private var playerChats = mutableMapOf<Player, Chat>()
 
     override fun initIntern(): Boolean {
-        plugin.server.pluginManager.registerEvents(this, plugin)
+        main.server.pluginManager.registerEvents(this, main)
 
         //Commands registrieren
-        val cmd = ChatCommand(plugin, api, this)
-        val msg = MsgCommand(plugin, api)
-        plugin.cmd.registerCommand("chat", cmd)
-        plugin.cmd.registerCommand("message", msg)
+        val cmd = ChatCommand(main, api, this)
+        val msg = MsgCommand(main, api)
+        main.cmd.registerCommand("chat", cmd)
+        main.cmd.registerCommand("message", msg)
 
         return true
     }

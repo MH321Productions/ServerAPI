@@ -12,9 +12,7 @@ import io.github.mh321productions.serverapi.util.functional.KotlinBukkitRunnable
 import io.github.mh321productions.serverapi.util.message.MessageBuilder
 import io.github.mh321productions.serverapi.util.message.MessageFormatter
 import net.md_5.bungee.api.chat.HoverEvent
-import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.chat.hover.content.Text
-import org.bukkit.Statistic
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -32,12 +30,12 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
     internal val pluginConfigClasses = mutableMapOf<SubPlugin, ConfigInfo>()
 
     override fun initIntern(): Boolean {
-        plugin.server.pluginManager.registerEvents(this, plugin)
+        main.server.pluginManager.registerEvents(this, main)
 
         pluginConfigClasses[ServerSubPlugin.instance] = ServerSubPlugin.instance.configInfo
 
         log.info("Initializing config directories")
-        files = ConfigFilesystem(plugin, this)
+        files = ConfigFilesystem(main, this)
         return files.init()
     }
 
@@ -77,9 +75,9 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
 
     private fun loadPlayerConfig(uuid: UUID, checkOnlineStatus: Boolean = true) : Boolean {
         if (configs.containsKey(uuid)) return configs[uuid]!!.loadFromFile()
-        if (checkOnlineStatus && !isPlayerOnline(uuid)) KotlinBukkitRunnable {unloadPlayerConfig(uuid)}.runTaskLater(plugin, 20 * 60 * 10)
+        if (checkOnlineStatus && !isPlayerOnline(uuid)) KotlinBukkitRunnable {unloadPlayerConfig(uuid)}.runTaskLater(main, 20 * 60 * 10)
 
-        val conf = PlayerConfig(plugin, this, uuid)
+        val conf = PlayerConfig(main, this, uuid)
         configs[uuid] = conf
         val res = conf.loadFromFile()
         return res
@@ -87,9 +85,9 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
 
     private fun loadPlayerStats(uuid: UUID, checkOnlineStatus: Boolean = true) : Boolean {
         if (stats.containsKey(uuid)) return stats[uuid]!!.loadFromFile()
-        if (checkOnlineStatus && !isPlayerOnline(uuid)) KotlinBukkitRunnable {unloadPlayerStats(uuid)}.runTaskLater(plugin, 20 * 60 * 10)
+        if (checkOnlineStatus && !isPlayerOnline(uuid)) KotlinBukkitRunnable {unloadPlayerStats(uuid)}.runTaskLater(main, 20 * 60 * 10)
 
-        val conf = PlayerStats(plugin, this, uuid)
+        val conf = PlayerStats(main, this, uuid)
         stats[uuid] = conf
         return conf.loadFromFile()
     }
@@ -104,7 +102,7 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
         return if (save && entry != null) entry.saveToFile() else true
     }
 
-    private fun isPlayerOnline(uuid: UUID) = plugin
+    private fun isPlayerOnline(uuid: UUID) = main
         .server
         .onlinePlayers
         .map { it.uniqueId }
@@ -122,13 +120,13 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
         //Messages to online friends
         val friendJoinMsg = MessageBuilder()
             .setPrefixes(FriendModule.msgPrefix)
-            .addComponent("${StringFormatter.formatPlayerName(player, plugin.perms.getHighestRank(player))} §7ist nun §aonline")
+            .addComponent("${StringFormatter.formatPlayerName(player, main.perms.getHighestRank(player))} §7ist nun §aonline")
             .build()
 
         MessageFormatter.sendMessage(
             getPlayerConfig(event.player.uniqueId)
                 .server.friends.friends
-                .mapNotNull { plugin.server.getPlayer(it) },
+                .mapNotNull { main.server.getPlayer(it) },
             friendJoinMsg
         )
 
@@ -145,13 +143,13 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
 
         val onlineFriends = getPlayerConfig(uuid)
             .server.friends.friends
-            .mapNotNull { plugin.server.getPlayer(it) }
+            .mapNotNull { main.server.getPlayer(it) }
         if (onlineFriends.isNotEmpty()) {
             val onlineFriendsMsg = MessageBuilder()
                 .setPrefixes(FriendModule.msgPrefix)
                 .addComponent("§7Aktuell ${if (onlineFriends.size == 1) "ist" else "sind"} ")
                 .addComponent("§e${onlineFriends.size}")
-                .setHoverEvent(HoverEvent.Action.SHOW_TEXT, *onlineFriends.map { Text(StringFormatter.formatPlayerName(it, plugin.perms.getHighestRank(it))) }.toTypedArray())
+                .setHoverEvent(HoverEvent.Action.SHOW_TEXT, *onlineFriends.map { Text(StringFormatter.formatPlayerName(it, main.perms.getHighestRank(it))) }.toTypedArray())
                 .addComponent(" §7deiner Freunde online")
                 .build()
 
@@ -165,7 +163,7 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
 
             configs[event.player.uniqueId]?.saveToFile()
             stats[event.player.uniqueId]?.saveToFile()
-        }.runTaskTimer(plugin, 20 * 60 * 60, 20 * 60 * 60)
+        }.runTaskTimer(main, 20 * 60 * 60, 20 * 60 * 60)
     }
 
     @EventHandler
@@ -176,13 +174,13 @@ class ConfigModule (plugin: Main, api: APIImplementation) : Module(ModuleType.Co
         val uuid = player.uniqueId
         val friendLeaveMsg = MessageBuilder()
             .setPrefixes(FriendModule.msgPrefix)
-            .addComponent("${StringFormatter.formatPlayerName(player, plugin.perms.getHighestRank(player))} §7ist nun §coffline")
+            .addComponent("${StringFormatter.formatPlayerName(player, main.perms.getHighestRank(player))} §7ist nun §coffline")
             .build()
 
         MessageFormatter.sendMessage(
             getPlayerConfig(event.player.uniqueId)
                 .server.friends.friends
-                .mapNotNull { plugin.server.getPlayer(it) },
+                .mapNotNull { main.server.getPlayer(it) },
             friendLeaveMsg
         )
 

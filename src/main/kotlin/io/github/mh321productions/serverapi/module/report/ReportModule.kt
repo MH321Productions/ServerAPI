@@ -36,12 +36,12 @@ class ReportModule(plugin: Main, api: APIImplementation) : Module(ModuleType.Rep
         reasons.addAll(ReportType.standardReasons)
 
         log.info("Lade Reportdatei")
-        reportFile = File(plugin.filesystem.getModuleFolder(ModuleType.Report), "reports.dat")
+        reportFile = File(main.filesystem.getModuleFolder(ModuleType.Report), "reports.dat")
 
-        cmd = ReportCommand(plugin, api, this)
-        manageCmd = ReportsCommand(plugin, api, this)
-        plugin.cmd.registerCommand("report", cmd)
-        plugin.cmd.registerCommand("reportlist", manageCmd)
+        cmd = ReportCommand(main, api, this)
+        manageCmd = ReportsCommand(main, api, this)
+        main.cmd.registerCommand("report", cmd)
+        main.cmd.registerCommand("reportlist", manageCmd)
 
         if (reportFile.exists()) {
             try {

@@ -23,7 +23,7 @@ class FriendModule(main: Main, api: APIImplementation) : Module(ModuleType.Frien
     private val conf = api.getModule(ModuleType.Config)
 
     override fun initIntern() : Boolean {
-        plugin.cmd.registerCommand("friend", FriendCommand(plugin, api, this))
+        main.cmd.registerCommand("friend", FriendCommand(main, api, this))
 
         return true
     }
@@ -33,7 +33,7 @@ class FriendModule(main: Main, api: APIImplementation) : Module(ModuleType.Frien
     override fun unregisterSubPlugin(sub: SubPlugin) = removeIntern(sub)
 
     val maxNumberOfFriends : Int
-        get() = plugin.conf.modules.friend.maxFriends
+        get() = main.conf.modules.friend.maxFriends
 
     /**
      * Returns the friends of an online player as an immutable list
@@ -193,12 +193,12 @@ class FriendModule(main: Main, api: APIImplementation) : Module(ModuleType.Frien
      *
      * This queries the permission "api.friend.bypass-limit"
      */
-    fun canBypassFriendLimit(player: Player) = plugin.perms.hasPermission(player, "api.friend.bypass-limit")
+    fun canBypassFriendLimit(player: Player) = main.perms.hasPermission(player, "api.friend.bypass-limit")
 
     /**
      * Checks whether a player can bypass a friend limit
      *
      * This queries the permission "api.friend.bypass-limit"
      */
-    suspend fun canBypassFriendLimitAsync(uuid: UUID) = plugin.perms.hasPermissionAsync(uuid, "api.friend.bypass-limit")
+    suspend fun canBypassFriendLimitAsync(uuid: UUID) = main.perms.hasPermissionAsync(uuid, "api.friend.bypass-limit")
 }

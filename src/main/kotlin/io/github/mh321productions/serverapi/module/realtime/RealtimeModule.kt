@@ -14,7 +14,7 @@ class RealtimeModule(plugin: Main, api: APIImplementation) : Module(ModuleType.R
 
     override fun initIntern(): Boolean {
         worker = RealtimeWorker(this)
-        worker.runTaskTimer(plugin, 0, 20)
+        worker.runTaskTimer(main, 0, 20)
 
         return true
     }

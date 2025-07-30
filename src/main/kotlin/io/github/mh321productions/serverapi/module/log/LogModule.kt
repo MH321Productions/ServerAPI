@@ -29,7 +29,7 @@ class LogModule(plugin: Main, api: APIImplementation) : Module(ModuleType.Loggin
 
     override fun registerSubPlugin(sub: SubPlugin, func: () -> Unit): Boolean {
         return try {
-            val wrapper = LogWrapper(plugin, sub)
+            val wrapper = LogWrapper(main, sub)
             logWrappers.add(wrapper)
             addIntern(sub, func)
             true
