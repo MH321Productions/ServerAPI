@@ -12,11 +12,7 @@ repositories {
 
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") //Spigot Repo
     maven("https://jitpack.io") //Vault Repo
-
-    maven { //ProtocolLib
-        name = "dmulloy2-repo"
-        url = uri("https://repo.dmulloy2.net/repository/public/")
-    }
+    maven("https://repo.dmulloy2.net/repository/public/") //ProtocolLib
 }
 
 dependencies {
